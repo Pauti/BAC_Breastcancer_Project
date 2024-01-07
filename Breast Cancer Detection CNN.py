@@ -123,93 +123,96 @@ print("-- Shape Test:\n", df_mass_test.shape)
 # MASS DATASET VISUALIZATIONS
 print("-- MASS DATASET VISUALIZATIONS --")
 
-# Pathology Types
-def plot_breast_cancer_types(df):
-    value = df['pathology'].value_counts()
-    plt.figure(figsize=(10, 5))
-    plt.pie(value, labels=value.index, autopct='%1.1f%%')
-    plt.title('Breast Cancer Types')
-    plt.savefig('breastcancer_detection_p3.11/Plots/Breast_Cancer_Types.png')
-    plt.show()
+show_plots = False
 
-plot_breast_cancer_types(df_mass_train)
+if show_plots == True:
+    # Pathology Types
+    def plot_breast_cancer_types(df):
+        value = df['pathology'].value_counts()
+        plt.figure(figsize=(10, 5))
+        plt.pie(value, labels=value.index, autopct='%1.1f%%')
+        plt.title('Breast Cancer Types')
+        plt.savefig('breastcancer_detection_p3.11/Plots/Breast_Cancer_Types.png')
+        plt.show()
 
-# Assesment Types
-def plot_assessment_types(df):
-    plt.figure(figsize=(10, 5))
-    sns.countplot(x='assessment', data=df, hue='pathology')
-    plt.title('Assessment Types\n 0: Undetermined, 1: Well Differentiated, 2: Moderately Differentiated, 3: Poorly Differentiated, 4/5: Undifferentiated')
-    plt.ylabel('Count')
-    plt.xlabel('Assessment')
-    plt.savefig('breastcancer_detection_p3.11/Plots/Assessment_Types.png')
-    plt.show()
+    plot_breast_cancer_types(df_mass_train)
 
-plot_assessment_types(df_mass_train)
+    # Assesment Types
+    def plot_assessment_types(df):
+        plt.figure(figsize=(10, 5))
+        sns.countplot(x='assessment', data=df, hue='pathology')
+        plt.title('Assessment Types\n 0: Undetermined, 1: Well Differentiated, 2: Moderately Differentiated, 3: Poorly Differentiated, 4/5: Undifferentiated')
+        plt.ylabel('Count')
+        plt.xlabel('Assessment')
+        plt.savefig('breastcancer_detection_p3.11/Plots/Assessment_Types.png')
+        plt.show()
 
-# Cancer finesse / subtlety
-def plot_cancer_subtlety(df):
-    plt.figure(figsize=(10, 5))
-    sns.countplot(x='subtlety', data=df)
-    plt.title('Cancer Subtlety')
-    plt.ylabel('Count')
-    plt.xlabel('Subtlety')
-    plt.savefig('breastcancer_detection_p3.11/Plots/Cancer_Subtlety.png')
-    plt.show()
+    plot_assessment_types(df_mass_train)
 
-plot_cancer_subtlety(df_mass_train)
+    # Cancer finesse / subtlety
+    def plot_cancer_subtlety(df):
+        plt.figure(figsize=(10, 5))
+        sns.countplot(x='subtlety', data=df)
+        plt.title('Cancer Subtlety')
+        plt.ylabel('Count')
+        plt.xlabel('Subtlety')
+        plt.savefig('breastcancer_detection_p3.11/Plots/Cancer_Subtlety.png')
+        plt.show()
 
-# Mass Shape against pathology
-def plot_mass_shape(df):
-    plt.figure(figsize=(10, 6))
-    sns.countplot(x='mass shape', data=df, hue='pathology')
-    plt.title('Mass Shape Types against Pathology')
-    plt.ylabel('Pathology Count')
-    plt.xlabel('Mass Shape')
-    plt.legend()
-    plt.xticks(rotation=45, ha='right')
-    plt.savefig('breastcancer_detection_p3.11/Plots/Mass_Shape_against_Pathology.png')
-    plt.show()
+    plot_cancer_subtlety(df_mass_train)
 
-plot_mass_shape(df_mass_train)
+    # Mass Shape against pathology
+    def plot_mass_shape(df):
+        plt.figure(figsize=(10, 6))
+        sns.countplot(x='mass shape', data=df, hue='pathology')
+        plt.title('Mass Shape Types against Pathology')
+        plt.ylabel('Pathology Count')
+        plt.xlabel('Mass Shape')
+        plt.legend()
+        plt.xticks(rotation=45, ha='right')
+        plt.savefig('breastcancer_detection_p3.11/Plots/Mass_Shape_against_Pathology.png')
+        plt.show()
 
-# Breast Density against pathology
-def plot_breast_density(df):
-    plt.figure(figsize=(10, 6))
-    sns.countplot(x='breast_density', data=df, hue='pathology')
-    plt.title('Breast Density against Pathology\n 1: Fatty, 2: Scattered fibroglandular densities, 3: Heterogeneously dense, 4: Extremely dense')
-    plt.ylabel('Pathology Count')
-    plt.xlabel('Breast Density')
-    plt.legend()
-    plt.savefig('breastcancer_detection_p3.11/Plots/Breast_Density_against_Pathology.png')
-    plt.show()
+    plot_mass_shape(df_mass_train)
 
-plot_breast_density(df_mass_train)
+    # Breast Density against pathology
+    def plot_breast_density(df):
+        plt.figure(figsize=(10, 6))
+        sns.countplot(x='breast_density', data=df, hue='pathology')
+        plt.title('Breast Density against Pathology\n 1: Fatty, 2: Scattered fibroglandular densities, 3: Heterogeneously dense, 4: Extremely dense')
+        plt.ylabel('Pathology Count')
+        plt.xlabel('Breast Density')
+        plt.legend()
+        plt.savefig('breastcancer_detection_p3.11/Plots/Breast_Density_against_Pathology.png')
+        plt.show()
 
-# Dissplay Images # error no such file or directory?
-import matplotlib.image as mpimg
+    plot_breast_density(df_mass_train)
 
-def display_images(column, number):
-    number_to_visualize = number
-    rows = 1
-    cols = number_to_visualize
-    fig, axes = plt.subplots(rows, cols, figsize=(15, 5))
-    for index, row in df_mass_train.head(number_to_visualize).iterrows():
-        image_path = row[column]
-        print(image_path)
-        image_path = image_path.replace('../', '')
-        image = mpimg.imread(image_path)
-        ax = axes[index]
-        ax.imshow(image, cmap='gray')
-        ax.set_title(f"{row['pathology']}")
-        ax.axis('off')
-    plt.tight_layout()
-    plt.show()
+    # Dissplay Images # error no such file or directory?
+    import matplotlib.image as mpimg
 
-# Display Images
-print("-- Full Mammograms --")
-display_images('image file path', 4)
-print("-- Cropped Mammograms --")
-display_images('cropped image file path', 4)
+    def display_images(column, number):
+        number_to_visualize = number
+        rows = 1
+        cols = number_to_visualize
+        fig, axes = plt.subplots(rows, cols, figsize=(15, 5))
+        for index, row in df_mass_train.head(number_to_visualize).iterrows():
+            image_path = row[column]
+            print(image_path)
+            image_path = image_path.replace('../', '')
+            image = mpimg.imread(image_path)
+            ax = axes[index]
+            ax.imshow(image, cmap='gray')
+            ax.set_title(f"{row['pathology']}")
+            ax.axis('off')
+        plt.tight_layout()
+        plt.show()
+
+    # Display Images
+    print("-- Full Mammograms --")
+    display_images('image file path', 4)
+    print("-- Cropped Mammograms --")
+    display_images('cropped image file path', 4)
 
 # --------------------
 
@@ -229,6 +232,7 @@ def preprocess_image(image_path, desired_size):
     image_path = image_path.replace('../', '')
     image = cv2.imread(image_path)
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB) # convert to RGB because cv2 reads images in BGR format
+    image = image[50:-50, 50:-50, :] # crop 50 pixels from each edge of image
     image = cv2.resize(image, (desired_size[1], desired_size[0])) # resize image to desired size to ensure all images have same size
     image = image / 255.0 # normalize image pixel range from [0, 255] to [0, 1]
     return image
@@ -236,17 +240,64 @@ def preprocess_image(image_path, desired_size):
 # Merge Train and Test Dataframes
 mass_full = pd.concat([df_mass_train, df_mass_test], axis=0)
 
+mass_train = df_mass_train
+mass_test = df_mass_test
+
+# Checks:
+
+print("-- Unique Value Counts --")
+print("mass_train:")
+print(mass_train['pathology'].value_counts())
+# Calculate ratio of target classes
+class_counts = mass_train['pathology'].value_counts()
+total_samples = class_counts.sum()
+class_ratios = class_counts / total_samples
+
+# Print ratio of target classes
+print("-- Class Ratios --")
+for class_label, ratio in class_ratios.items():
+    print(f"{class_label}: {ratio:.2%}")
+
+print("\nmass_test:")
+print(mass_test['pathology'].value_counts())
+# Calculate ratio of target classes
+class_counts = mass_test['pathology'].value_counts()
+total_samples = class_counts.sum()
+class_ratios = class_counts / total_samples
+
+# Print ratio of target classes
+print("-- Class Ratios --")
+for class_label, ratio in class_ratios.items():
+    print(f"{class_label}: {ratio:.2%}")
+
+#check if there are common values in both train and test sets
+print("-- Common Values in Train and Test Sets --")
+# Check for common values in train and test sets
+common_values = np.intersect1d(mass_train['cropped image file path'], mass_test['cropped image file path'])
+if common_values.size > 0:
+    print("Common values found in train and test sets:", common_values)
+else:
+    print("No common values found in train and test sets.")
+
+
 # Target Size
 desired_size = (224, 224, 3) # width, height, channels
 
-#show a sample image
-x,y = mass_full['image file path'].iloc[0], mass_full['pathology'].iloc[0]
+#show a preprocessed image
+x,y = mass_train['image file path'].iloc[0], mass_train['pathology'].iloc[0]
 plt.imshow(preprocess_image(x, desired_size))
-plt.savefig('breastcancer_detection_p3.11/Plots/Sample_Image.png')
+plt.title("Sample Preprocessed Image: {}".format(y))
+plt.savefig('breastcancer_detection_p3.11/Plots/Sample_Pre_Image.png')
 plt.show()
+
+
+# Apply preprocessing to train/test data
+#mass_train['preprocessed_images'] = mass_train['image file path'].apply(lambda x: preprocess_image(x, desired_size))
+#mass_test['preprocessed_images'] = mass_test['image file path'].apply(lambda x: preprocess_image(x, desired_size))
 
 # Apply preprocessing to train data
 mass_full['preprocessed_images'] = mass_full['image file path'].apply(lambda x: preprocess_image(x, desired_size))
+print("-- Preprocessed Images:\n", mass_full['preprocessed_images'].head())
 
 # Mapper for pathology types
 mapper = {'BENIGN_WITHOUT_CALLBACK': 0, 'BENIGN': 0, 'MALIGNANT': 1} # 0: Benign & Benign without Callback = No Cancer, 1: Malignant = Cancer
@@ -254,14 +305,22 @@ mapper = {'BENIGN_WITHOUT_CALLBACK': 0, 'BENIGN': 0, 'MALIGNANT': 1} # 0: Benign
 # Convert preprocessed_images column to numpy array for CNN input
 X_resized = np.array(mass_full['preprocessed_images'].tolist())
 
+#train_resized = np.array(mass_train['preprocessed_images'].tolist())
+#test_resized = np.array(mass_test['preprocessed_images'].tolist())
+
 # Apply mapper to pathology column
 mass_full['labels'] = mass_full['pathology'].replace(mapper)
 
+#mass_train['labels'] = mass_train['pathology'].replace(mapper)
+#mass_test['labels'] = mass_test['pathology'].replace(mapper)
+
 # Number of classes
 num_classes = len(mass_full['labels'].unique())
+#num_classes = len(mass_train['labels'].unique())
 
 # print labels
 print("-- Labels:\n", mass_full['labels'].unique())
+#print("-- Labels:\n", mass_train['labels'].unique())
 
 # Split data into train, test and validation sets (70, 20, 10)
 X_train, X_temp, y_train, y_temp = train_test_split(X_resized, mass_full['labels'], test_size=0.3, random_state=42)
@@ -273,6 +332,23 @@ y_train = to_categorical(y_train, num_classes)
 y_test = to_categorical(y_test, num_classes)
 y_val = to_categorical(y_val, num_classes)
 
+#y_train = to_categorical(mass_train['labels'], num_classes)
+#y_test = to_categorical(mass_test['labels'], num_classes)
+
+# Split data into test and validation sets (80% for test, 20% for validation)
+#X_test, X_val, y_test, y_val = train_test_split(test_resized, y_test, test_size=0.5, random_state=42)
+
+# Print the shapes of the new datasets
+print("Train set shape:", X_train.shape)
+print("Test set shape:", X_test.shape)
+print("Validation set shape:", X_val.shape)
+
+#print("Train set shape:", train_resized.shape)
+#print("Test set shape:", X_test.shape)
+#print("Validation set shape:", X_val.shape)
+
+#X_train = train_resized
+
 # --------------------
 
 # Neural Network Model
@@ -281,7 +357,7 @@ print("-- NEURAL NETWORK MODEL --")
 # Import Tensorflow Libraries
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropout
-from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.optimizers import Adam, SGD
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.utils import plot_model
 
@@ -293,26 +369,29 @@ def cnn_architecture():
                                     shear_range=0.2, # Shear Transformation up to 20% (distortion along an axis)
                                     zoom_range=0.1, # zoom in randomly up to 10% (was 20)
                                     horizontal_flip=True, # flip image horizontally
-                                    fill_mode='reflect' # fill in any newly created pixels with nearest filled value # other options: constant, nearest, wrap, reflect
-
+                                    fill_mode='constant', # fill in any newly created pixels with nearest filled value # other options: constant, nearest, wrap, reflect
+                                    cval = 0 # value used for fill_mode = constant
                                     )
 
     # Apply Augmentation to Train Data
-    train_datagen_augmented = train_datagen.flow(X_train, y_train, batch_size=64) # flow generates batches of randomly transformed images 
+    train_datagen_augmented = train_datagen.flow(X_train, y_train, batch_size=32) # flow generates batches of randomly transformed images 
     # (how many samples will be propagated through the network at a time; lower batch size = more robust convergence)
 
     #plot a picture to see how the augmentation looks like
     x,y = train_datagen_augmented.next()
     image = x[0]
     plt.imshow(image)
-    plt.savefig('breastcancer_detection_p3.11/Plots/AugmentationDemo.png')
+    plt.title("Augmentation Demo Picture")
+    plt.savefig('breastcancer_detection_p3.11/Plots/AugmentDemo.png')
     plt.show()
     # randomly select X images from augmented data and store them in Augment folder
     for i in range(0, 20):
        x,y = train_datagen_augmented.next()
        image = x[0]
        plt.imshow(image)
+       plt.title("Augmentation Picture {}".format(i))
        plt.savefig('breastcancer_detection_p3.11/Plots/Augment/Augment{}.png'.format(i))
+       print("-- Augmentation Picture {} saved".format(i))
 
     # Build CNN Model
     model = Sequential() # layers are added one by one
@@ -331,7 +410,7 @@ def cnn_architecture():
     model.add(MaxPooling2D(pool_size=(2, 2)))
     model.add(Conv2D(filters=128, kernel_size=(3, 3), activation='relu'))
     model.add(MaxPooling2D(pool_size=(2, 2)))
-    model.add(Dropout(0.5))
+    model.add(Dropout(0.2))
     # Dropout Layers randomly drop neurons during training to prevent overfitting
     model.add(Flatten())
     # Flatten Layer converts the output of the previous layer to a 1D array
@@ -340,7 +419,7 @@ def cnn_architecture():
     model.add(Dense(num_classes, activation='softmax')) # output layer; softmax converts vector of values to probability distribution
 
     # Compile Model
-    model.compile(loss='binary_crossentropy', optimizer=Adam(lr=0.001), metrics=['accuracy'])
+    model.compile(loss='binary_crossentropy', optimizer=Adam(learning_rate=0.0001), metrics=['accuracy'])
     # compile() configures the learning process before training
     # Adam (Adaptive Moment Estimation) calculates adaptive learning rates for each parameter
     # 0.0001 small enopugh to not overshoot the global minimum but large enough to converge quickly
@@ -359,7 +438,8 @@ def cnn_architecture():
 
 model, history = cnn_architecture()
 
-print("-- Model Summary:\n", model.summary())
+print("-- Model Summary:\n")
+model.summary()
 
 print("-- Model Evaluation:\n", model.evaluate(X_test, y_test))
 
