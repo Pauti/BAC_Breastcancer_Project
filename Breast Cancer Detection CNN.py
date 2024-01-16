@@ -100,9 +100,10 @@ print("-- Missing Train Values:\n", df_mass_train.isnull().sum())
 print("-- Missing Test Values:\n", df_mass_test.isnull().sum())
 
 # Fill missing values with backward fill (missing value filled with next value in column)
+# train set
 df_mass_train['mass shape'] = df_mass_train['mass shape'].bfill()
 df_mass_train['mass margins'] = df_mass_train['mass margins'].bfill()
-#
+# test set
 df_mass_test['mass margins'] = df_mass_test['mass margins'].bfill()
 
 
@@ -227,12 +228,36 @@ import tensorflow as tf
 from sklearn.model_selection import train_test_split
 from tensorflow.keras.utils import to_categorical
 
+# Show image before processing
+def show_image(image_path):
+    image_path = image_path.replace('../', '')
+    image = cv2.imread(image_path)
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    plt.imshow(image)
+    plt.title("Sample Image")
+    plt.savefig('breastcancer_detection_p3.11/Plots/Sample_Image_Before.png')
+    plt.show()
+
+show_image(df_mass_train['image file path'].iloc[0])
+
 # Image preprocessor
 def preprocess_image(image_path, desired_size):
     image_path = image_path.replace('../', '')
     image = cv2.imread(image_path)
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB) # convert to RGB because cv2 reads images in BGR format
-    image = image[50:-50, 50:-50, :] # crop 50 pixels from each edge of image
+
+    # Crop image to lessen white edges
+    image = image[100:-100, 100:-100, :] # crop 100 pixels from each edge of image
+
+    # Reduce noise in image
+    #image = cv2.fastNlMeansDenoisingColored(image, None, 10, 10, 7, 15) # reduce noise in image
+    
+    # Apply adaptive histogram equalization for contrast adjustment
+    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8)) # clip limit is the threshold for contrast limiting, tileGridSize is the number of grid cells
+    image_yuv = cv2.cvtColor(image, cv2.COLOR_RGB2YUV) # YUV because HE is typically applied to luminance channel
+    image_yuv[:,:,0] = clahe.apply(image_yuv[:,:,0]) # apply adaptive histogram equalization
+    image = cv2.cvtColor(image_yuv, cv2.COLOR_YUV2RGB)
+    
     image = cv2.resize(image, (desired_size[1], desired_size[0])) # resize image to desired size to ensure all images have same size
     image = image / 255.0 # normalize image pixel range from [0, 255] to [0, 1]
     return image
@@ -246,7 +271,7 @@ mass_test = df_mass_test
 # Checks:
 
 print("-- Unique Value Counts --")
-print("mass_train:")
+print("--TRAIN:")
 print(mass_train['pathology'].value_counts())
 # Calculate ratio of target classes
 class_counts = mass_train['pathology'].value_counts()
@@ -258,7 +283,7 @@ print("-- Class Ratios --")
 for class_label, ratio in class_ratios.items():
     print(f"{class_label}: {ratio:.2%}")
 
-print("\nmass_test:")
+print("\n--TEST:")
 print(mass_test['pathology'].value_counts())
 # Calculate ratio of target classes
 class_counts = mass_test['pathology'].value_counts()
@@ -350,6 +375,7 @@ print("Validation set shape:", X_val.shape)
 #X_train = train_resized
 
 # --------------------
+input("Press Enter to continue...")
 
 # Neural Network Model
 print("-- NEURAL NETWORK MODEL --")
@@ -363,7 +389,7 @@ from tensorflow.keras.utils import plot_model
 
 def cnn_architecture():
     # Augment Data (artificially increase size of training set by applying random image transformations)
-    train_datagen = ImageDataGenerator(rotation_range=90, # rotate image randomly up to 90 degrees (was 40)
+    train_datagen = ImageDataGenerator(rotation_range=0, # rotate image randomly up to 90 degrees (was 40) Or 0 because medical images like X-rays or MRIs are usually taken in a standard orientation
                                     #width_shift_range=0.2, # shift image horizontally randomly up to 20% of image width
                                     #height_shift_range=0.2, # shift image vertically randomly up to 20% of image height
                                     shear_range=0.2, # Shear Transformation up to 20% (distortion along an axis)
@@ -396,30 +422,31 @@ def cnn_architecture():
     # Build CNN Model
     model = Sequential() # layers are added one by one
     # Add Convolutional Layers
-    model.add(Conv2D(filters=32, kernel_size=(3, 3), activation='relu', input_shape=(224, 224, 3))) 
+    model.add(Conv2D(filters=64, kernel_size=(3, 3), activation='relu', input_shape=(224, 224, 3))) 
     # Convolutional Layers perform feature extraction by applying filters to the input and passing the result to the next layer
     # filters: matrices applied to the input to extract features (detecting patterns (edges, lines, shapes, etc.))); number of filters = number of features 
     # kernel_size: dimensions of the filter matrix
     model.add(MaxPooling2D(pool_size=(2, 2)))
     # Max Pooling Layers reduce spacial dimensions of input data, helping to extract the most important features while reducing computational complexity
-    model.add(Conv2D(filters=64, kernel_size=(3, 3), activation='relu'))
+    model.add(Conv2D(filters=128, kernel_size=(3, 3), activation='relu', kernel_initializer='he_normal'))
     model.add(MaxPooling2D(pool_size=(2, 2)))
-    model.add(Conv2D(filters=64, kernel_size=(3, 3), activation='relu'))
+    model.add(Conv2D(filters=128, kernel_size=(3, 3), activation='relu', kernel_initializer='he_normal'))
     model.add(MaxPooling2D(pool_size=(2, 2)))
-    model.add(Conv2D(filters=128, kernel_size=(3, 3), activation='relu'))
+    model.add(Conv2D(filters=256, kernel_size=(3, 3), activation='relu', kernel_initializer='he_normal'))
     model.add(MaxPooling2D(pool_size=(2, 2)))
-    model.add(Conv2D(filters=128, kernel_size=(3, 3), activation='relu'))
+    model.add(Conv2D(filters=256, kernel_size=(3, 3), activation='relu', kernel_initializer='he_normal'))
     model.add(MaxPooling2D(pool_size=(2, 2)))
     model.add(Dropout(0.2))
     # Dropout Layers randomly drop neurons during training to prevent overfitting
     model.add(Flatten())
     # Flatten Layer converts the output of the previous layer to a 1D array
-    model.add(Dense(512, activation='relu')) # rectified linear unit (max(0, x)) help to mitigate the vanishing gradient problem
+    model.add(Dense(512, activation='relu', kernel_initializer='he_normal')) # rectified linear unit (max(0, x)) help to mitigate the vanishing gradient problem
     # Dense Layer is a fully connected layer with 512 units (neurons) and ReLU activation function
-    model.add(Dense(num_classes, activation='softmax')) # output layer; softmax converts vector of values to probability distribution
+    model.add(Dense(256, activation='relu', kernel_initializer='he_normal')) # additional dense layer
+    model.add(Dense(num_classes, activation='softmax', kernel_initializer='he_normal')) # output layer; softmax converts vector of values to probability distribution
 
     # Compile Model
-    model.compile(loss='binary_crossentropy', optimizer=Adam(learning_rate=0.0001), metrics=['accuracy'])
+    model.compile(loss='binary_crossentropy', optimizer=Adam(learning_rate=0.0001, beta_1=0.9, beta_2=0.999), metrics=['accuracy'])
     # compile() configures the learning process before training
     # Adam (Adaptive Moment Estimation) calculates adaptive learning rates for each parameter
     # 0.0001 small enopugh to not overshoot the global minimum but large enough to converge quickly
