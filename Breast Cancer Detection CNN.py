@@ -16,8 +16,11 @@ import time
 import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
+#
 
 start_time = time.time()
+
+#print(tf.config.list_physical_devices('GPU'))
 
 # Loading Meta Data
 df_metadata = pd.read_csv('breastcancer_detection_p3.11/Dataset/csv/meta.csv') 
@@ -389,12 +392,13 @@ from tensorflow.keras.utils import plot_model
 
 def cnn_architecture():
     # Augment Data (artificially increase size of training set by applying random image transformations)
-    train_datagen = ImageDataGenerator(rotation_range=0, # rotate image randomly up to 90 degrees (was 40) Or 0 because medical images like X-rays or MRIs are usually taken in a standard orientation
+    train_datagen = ImageDataGenerator(rotation_range=10, # rotate image randomly up to 90 degrees (was 40) Or 0 because medical images like X-rays or MRIs are usually taken in a standard orientation
                                     #width_shift_range=0.2, # shift image horizontally randomly up to 20% of image width
                                     #height_shift_range=0.2, # shift image vertically randomly up to 20% of image height
                                     shear_range=0.2, # Shear Transformation up to 20% (distortion along an axis)
                                     zoom_range=0.1, # zoom in randomly up to 10% (was 20)
                                     horizontal_flip=True, # flip image horizontally
+                                    #vertical_flip=True, # flip image vertically
                                     fill_mode='constant', # fill in any newly created pixels with nearest filled value # other options: constant, nearest, wrap, reflect
                                     cval = 0 # value used for fill_mode = constant
                                     )
@@ -418,6 +422,7 @@ def cnn_architecture():
        plt.title("Augmentation Picture {}".format(i))
        plt.savefig('breastcancer_detection_p3.11/Plots/Augment/Augment{}.png'.format(i))
        print("-- Augmentation Picture {} saved".format(i))
+       plt.close()  # Close the figure to release memory
 
     # Build CNN Model
     model = Sequential() # layers are added one by one
@@ -436,7 +441,7 @@ def cnn_architecture():
     model.add(MaxPooling2D(pool_size=(2, 2)))
     model.add(Conv2D(filters=256, kernel_size=(3, 3), activation='relu', kernel_initializer='he_normal'))
     model.add(MaxPooling2D(pool_size=(2, 2)))
-    model.add(Dropout(0.2))
+    model.add(Dropout(0.3))
     # Dropout Layers randomly drop neurons during training to prevent overfitting
     model.add(Flatten())
     # Flatten Layer converts the output of the previous layer to a 1D array
@@ -453,7 +458,7 @@ def cnn_architecture():
 
     # Train Model
     history = model.fit(train_datagen_augmented, 
-                        epochs=20, # number of times the model will cycle through the data
+                        epochs=30, # number of times the model will cycle through the data
                         validation_data=(X_val, y_val)
                     )
                     # fit() trains the model 
@@ -605,6 +610,37 @@ def plot_accuracy(history_dict):
 
 print("-- Plot Accuracy:")
 plot_accuracy(history_dict)
+
+# --------------------
+
+# Trying to improve model by looking at misclassified images
+def get_missclassified_images(X_test, y_test, y_pred_classes):
+    missclassified_images = []
+    for index, (actual, predicted) in enumerate(zip(y_test, y_pred_classes)):
+        if actual != predicted:
+            missclassified_images.append(X_test[index])
+    return missclassified_images
+
+# Get all misclassified images
+missclassified_images = get_missclassified_images(X_test, y_true_classes_test, y_pred_classes_test)
+
+# Save misclassified images
+import os
+
+def save_missclassified_images(missclassified_images):
+    directory = 'breastcancer_detection_p3.11/Plots/Miss'
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+    for i, image in enumerate(missclassified_images[:20]):
+        plt.imshow(image)
+        plt.axis('off')
+        plt.title("Misclassified Image {}".format(i))
+        plt.savefig(os.path.join(directory, "MissClass{}.png".format(i)))
+        plt.close()
+        print("-- Misclassified Image {} saved".format(i))
+
+# Save the misclassified images
+save_missclassified_images(missclassified_images)
 
 # --------------------
 
